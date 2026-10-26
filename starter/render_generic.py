@@ -24,6 +24,29 @@ def load_rgbd_data(path="data/rgbd_data.pkl"):
     return data
 
 
+def load_rgbd_views(path="data/rgbd_data.pkl"):
+    """
+    Loads the 2 RGB-D views and converts arrays to float torch tensors (CPU).
+
+    Returns:
+        views (list[dict]): one dict per view with keys
+            rgb (S, S, 3) in [0, 1], mask (S, S) in {0, 1},
+            depth (S, S), camera (PerspectiveCameras, CPU, NDC).
+    """
+    data = load_rgbd_data(path)
+    views = []
+    for i in (1, 2):
+        views.append(
+            {
+                "rgb": torch.from_numpy(data[f"rgb{i}"]).float(),
+                "mask": torch.from_numpy(data[f"mask{i}"]).float(),
+                "depth": torch.from_numpy(data[f"depth{i}"]).float(),
+                "camera": data[f"cameras{i}"],
+            }
+        )
+    return views
+
+
 def render_bridge(
     point_cloud_path="data/bridge_pointcloud.npz",
     image_size=256,

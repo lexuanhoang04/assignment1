@@ -10,6 +10,7 @@ import torch
 
 from starter.utils import get_device, get_mesh_renderer
 
+import numpy as np 
 
 def render_textured_cow(
     cow_path="data/cow.obj",
@@ -38,7 +39,28 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--cow_path", type=str, default="data/cow.obj")
     parser.add_argument("--image_size", type=int, default=256)
-    parser.add_argument("--output_path", type=str, default="images/textured_cow.jpg")
+    parser.add_argument("--output_path", type=str, default="images/textured_cow4.jpg")
     args = parser.parse_args()
-    render_textured_cow(cow_path=args.cow_path, image_size=args.image_size)
-    plt.imsave(args.output_path, render_textured_cow())
+    # R_relative = Rcc1 = Rco @ Roc1 = Roc1
+    # T_rel = tc1w - R_rel @ tc0w
+    # Roc1 = np.array([
+    #     [0, 1, 0],
+    #     [-1, 0, 0],
+    #     [0, 0, 1]
+    # ] )
+
+    Roc1 = np.array([
+        [1, 0, 0],
+        [0, 1, 0],
+        [0, 0, 1]
+    ] )
+
+
+    R_relative = Roc1 
+    
+    tc0w =np.array([0,0,3])
+    tc1w = np.array([0.5,0,3])
+    T_relative = tc1w - R_relative @ tc0w 
+
+    image = render_textured_cow(cow_path=args.cow_path, image_size=args.image_size, R_relative=R_relative, T_relative=T_relative)
+    plt.imsave(args.output_path, image)
